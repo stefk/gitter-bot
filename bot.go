@@ -7,10 +7,9 @@ import (
 )
 
 type Bot struct {
+	Context	*Context
 	API      *gitter.Gitter
-	user     *gitter.User
-	rooms    []gitter.Room
-	handlers []Handler
+	Handlers []Handler
 }
 
 type Event struct {
@@ -21,12 +20,6 @@ type Event struct {
 type Message struct {
 	Room    gitter.Room
 	Message gitter.Message
-}
-
-type Handler interface {
-	Description() string
-	Commands() []string
-	Handle(Message, *gitter.Gitter)
 }
 
 type stream struct {
@@ -55,12 +48,14 @@ func NewBot(token string) *Bot {
 	log.Printf("Found %d available room(s)\n", len(rooms))
 
 	handlers := make([]Handler, 0)
+	context := &Context{API: API, BotUser: user, BotRooms: rooms}
 
-	return &Bot{API, user, rooms, handlers}
+	return &Bot{API: API, Context: context, Handlers: handlers}
 }
 
 func (bot *Bot) AddHandler(handler Handler) {
-	bot.handlers = append(bot.handlers, handler)
+	handler.Init(bot.Context)
+	bot.Handlers = append(bot.Handlers, handler)
 }
 
 // Start streaming available rooms. Handlers will be triggered on each
@@ -68,7 +63,7 @@ func (bot *Bot) AddHandler(handler Handler) {
 func (bot *Bot) Listen() {
 	streams := make([]stream, 0)
 
-	for _, room := range bot.rooms {
+	for _, room := range bot.Context.BotRooms {
 		log.Printf("Streaming room %s\n", room.URL)
 		roomStream := bot.API.Stream(room.ID)
 		streams = append(streams, stream{Room: room, Stream: roomStream})
@@ -81,12 +76,10 @@ func (bot *Bot) Listen() {
 		event := <-c
 		switch ev := event.Data.(type) {
 		case *gitter.MessageReceived:
-			if ev.Message.From.Username != bot.user.Username {
+			if ev.Message.From.Username != bot.Context.BotUser.Username {
 				log.Printf("Received message from %s\n", event.Room.URL)
-				msg := Message{Room: event.Room, Message: ev.Message}
-
-				for _, handler := range bot.handlers {
-					go handler.Handle(msg, bot.API)
+				for _, handler := range bot.Handlers {
+					go handler.HandleMessage(event.Room, ev.Message)
 				}
 			}
 		case *gitter.GitterConnectionClosed:

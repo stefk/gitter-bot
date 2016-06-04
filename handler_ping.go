@@ -1,10 +1,20 @@
 package main
 
 import (
+	"log"
 	"github.com/sromku/go-gitter"
 )
 
-type Ping struct{}
+type Ping struct{
+	Context *Context
+}
+
+func (h *Ping) Init(context *Context) {
+	h.Context = context
+	h.Context.On("foo", func (data interface{}) {
+		log.Println("Received foo event")
+	})
+}
 
 func (*Ping) Description() string {
 	return "Respond to ping messages"
@@ -14,8 +24,8 @@ func (*Ping) Commands() []string {
 	return []string{"ping - Respond with pong"}
 }
 
-func (*Ping) Handle(msg Message, API *gitter.Gitter) {
-	if msg.Message.Text == "ping" {
-		API.SendMessage(msg.Room.ID, "Pong")
+func (h *Ping) HandleMessage(room gitter.Room, msg gitter.Message) {
+	if msg.Text == "ping" {
+		h.Context.SendMessage(room.ID, "Pong")
 	}
 }
