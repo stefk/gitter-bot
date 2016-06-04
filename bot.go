@@ -86,7 +86,7 @@ func (bot *Bot) Listen() {
 				msg := Message{Room: event.Room, Message: ev.Message}
 
 				for _, handler := range bot.handlers {
-					handler.Handle(msg, bot.API)
+					go handler.Handle(msg, bot.API)
 				}
 			}
 		case *gitter.GitterConnectionClosed:
