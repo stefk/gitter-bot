@@ -4,7 +4,7 @@ import (
 	"github.com/sromku/go-gitter"
 )
 
-type HeardYou struct{
+type HeardYou struct {
 	Context *Context
 }
 

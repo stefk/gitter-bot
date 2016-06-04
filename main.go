@@ -8,7 +8,7 @@ import (
 func main() {
 	token := os.Getenv("GITTER_TOKEN")
 
-	if (token == "") {
+	if token == "" {
 		log.Fatal("GITTER_TOKEN environment variable is required")
 	}
 

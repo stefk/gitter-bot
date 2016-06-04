@@ -4,12 +4,12 @@ import (
 	"github.com/sromku/go-gitter"
 )
 
-type Listener func (data interface{})
+type Listener func(data interface{})
 
 type Context struct {
-	BotUser *gitter.User
-	BotRooms []gitter.Room
-	API *gitter.Gitter
+	BotUser   *gitter.User
+	BotRooms  []gitter.Room
+	API       *gitter.Gitter
 	listeners map[string][]Listener
 }
 

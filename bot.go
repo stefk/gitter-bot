@@ -7,19 +7,14 @@ import (
 )
 
 type Bot struct {
-	Context	*Context
+	Context  *Context
 	API      *gitter.Gitter
 	Handlers []Handler
 }
 
-type Event struct {
+type event struct {
 	Room gitter.Room
 	Data interface{}
-}
-
-type Message struct {
-	Room    gitter.Room
-	Message gitter.Message
 }
 
 type stream struct {
@@ -90,13 +85,13 @@ func (bot *Bot) Listen() {
 
 // Merge event channels from different rooms into a single channel
 // (see https://blog.golang.org/pipelines)
-func merge(streams []stream) chan Event {
+func merge(streams []stream) chan event {
 	var wg sync.WaitGroup
-	out := make(chan Event)
+	out := make(chan event)
 
 	output := func(s stream) {
 		for n := range s.Stream.Event {
-			out <- Event{Room: s.Room, Data: n.Data}
+			out <- event{Room: s.Room, Data: n.Data}
 		}
 		wg.Done()
 	}

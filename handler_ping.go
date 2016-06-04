@@ -1,17 +1,17 @@
 package main
 
 import (
-	"log"
 	"github.com/sromku/go-gitter"
+	"log"
 )
 
-type Ping struct{
+type Ping struct {
 	Context *Context
 }
 
 func (h *Ping) Init(context *Context) {
 	h.Context = context
-	h.Context.On("foo", func (data interface{}) {
+	h.Context.On("foo", func(data interface{}) {
 		log.Println("Received foo event")
 	})
 }
